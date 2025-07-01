@@ -34,12 +34,14 @@ from runner.koan import *
 # Your goal is to write the score method.
 
 def score(dice):
-    from functools import reduce
+    return score_plus(dice)[0]
 
-    score = 0
-
+def score_plus(dice):
     if len(dice) > 5:
         raise ValueError()
+
+    score = 0
+    non_scoring = len(dice)
 
     counts = defaultdict(int)
     for num in dice:
@@ -48,16 +50,19 @@ def score(dice):
     for num, count in counts.items():
         if (count >= 3):
             count -= 3
+            non_scoring -= 3
             if (num == 1):
                 score += 1000
             else:
                 score += num * 100
         if num == 1:
             score += count * 100
+            non_scoring -= count
         if num == 5:
             score += count * 50
+            non_scoring -= count
 
-    return score
+    return (score, non_scoring)
 
 class AboutScoringProject(Koan):
     def test_score_of_an_empty_list_is_zero(self):
@@ -93,3 +98,8 @@ class AboutScoringProject(Koan):
     def test_ones_not_left_out(self):
         self.assertEqual(300, score([1,2,2,2]))
         self.assertEqual(350, score([1,5,2,2,2]))
+
+    def test_score_plus(self):
+        self.assertEqual((500+100, 1), score_plus([5, 5, 1, 5, 3]))
+        self.assertEqual((500+100+100, 0), score_plus([5, 5, 1, 5, 1]))
+        self.assertEqual((0, 5), score_plus([2, 3, 4, 6, 6]))
